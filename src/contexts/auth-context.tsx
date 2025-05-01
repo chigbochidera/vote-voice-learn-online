@@ -8,6 +8,7 @@ interface User {
   email: string;
   role: "user" | "admin";
   enrolledCourses: string[];
+  isEmailVerified: boolean;
 }
 
 interface AuthContextType {
@@ -19,6 +20,8 @@ interface AuthContextType {
   forgotPassword: (email: string) => Promise<boolean>;
   resetPassword: (token: string, password: string) => Promise<boolean>;
   updateProfile: (data: Partial<User>) => Promise<boolean>;
+  verifyEmail: (token: string) => Promise<boolean>;
+  resendVerificationEmail: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password: "password123",
       role: "user" as const,
       enrolledCourses: ["course-1", "course-2"],
+      isEmailVerified: true,
     },
     {
       id: "admin-1",
@@ -44,6 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password: "admin123",
       role: "admin" as const,
       enrolledCourses: [],
+      isEmailVerified: true,
     },
   ];
 
@@ -100,11 +105,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             email,
             role: "user" as const,
             enrolledCourses: [],
+            isEmailVerified: false,
           };
           setUser(newUser);
           toast({
             title: "Registration successful",
-            description: "Your account has been created",
+            description: "Please check your email for verification instructions",
           });
           resolve(true);
         }
@@ -165,6 +171,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const verifyEmail = async (token: string): Promise<boolean> => {
+    setIsLoading(true);
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // In a real app, we'd validate the token
+        if (user) {
+          setUser({ ...user, isEmailVerified: true });
+        }
+        
+        toast({
+          title: "Email verified",
+          description: "Your email has been successfully verified",
+        });
+        resolve(true);
+        setIsLoading(false);
+      }, 1000);
+    });
+  };
+
+  const resendVerificationEmail = async (): Promise<boolean> => {
+    setIsLoading(true);
+    // Simulate API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (user) {
+          toast({
+            title: "Verification email sent",
+            description: "A new verification email has been sent to your inbox",
+          });
+          resolve(true);
+        } else {
+          toast({
+            title: "Error",
+            description: "You must be logged in to request a verification email",
+            variant: "destructive",
+          });
+          resolve(false);
+        }
+        setIsLoading(false);
+      }, 1000);
+    });
+  };
+
   const updateProfile = async (data: Partial<User>): Promise<boolean> => {
     setIsLoading(true);
     // Simulate API call
@@ -201,6 +251,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         forgotPassword,
         resetPassword,
         updateProfile,
+        verifyEmail,
+        resendVerificationEmail,
       }}
     >
       {children}

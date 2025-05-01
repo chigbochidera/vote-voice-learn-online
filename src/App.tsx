@@ -16,6 +16,20 @@ import NotFound from "@/pages/NotFound";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
+import VerifyEmail from "@/pages/auth/VerifyEmail";
+
+// Adding routes but commenting them out until we implement them
+// import UserDashboard from "@/pages/user/Dashboard";
+// import CourseDetails from "@/pages/courses/CourseDetails";
+// import MyCourses from "@/pages/user/MyCourses";
+// import Profile from "@/pages/user/Profile";
+// import Certificate from "@/pages/user/Certificate";
+// import AdminDashboard from "@/pages/admin/Dashboard";
+// import ManageCourses from "@/pages/admin/ManageCourses";
+// import ManageUsers from "@/pages/admin/ManageUsers";
+// import CreateCourse from "@/pages/admin/CreateCourse";
+// import EditCourse from "@/pages/admin/EditCourse";
 
 const queryClient = new QueryClient();
 
@@ -35,8 +49,10 @@ const App = () => (
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/verify-email" element={<VerifyEmail />} />
                   
-                  {/* Protected routes will go here */}
+                  {/* Protected routes will go here once implemented */}
                   {/* <Route 
                     path="/dashboard" 
                     element={
@@ -44,14 +60,78 @@ const App = () => (
                         <UserDashboard />
                       </ProtectedRoute>
                     } 
+                  />
+                  <Route 
+                    path="/my-courses" 
+                    element={
+                      <ProtectedRoute>
+                        <MyCourses />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/courses/:courseId" 
+                    element={
+                      <ProtectedRoute>
+                        <CourseDetails />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/certificate/:courseId" 
+                    element={
+                      <ProtectedRoute>
+                        <Certificate />
+                      </ProtectedRoute>
+                    } 
                   /> */}
                   
-                  {/* Admin routes will go here */}
+                  {/* Admin routes will go here once implemented */}
                   {/* <Route
                     path="/admin"
                     element={
                       <ProtectedRoute allowedRoles={["admin"]}>
                         <AdminDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/courses"
+                    element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <ManageCourses />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/users"
+                    element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <ManageUsers />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/courses/create"
+                    element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <CreateCourse />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/courses/:courseId/edit"
+                    element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <EditCourse />
                       </ProtectedRoute>
                     }
                   /> */}
