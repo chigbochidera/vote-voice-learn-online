@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Users, Bookmark, BarChart, PieChart, Plus, BookOpen } from "lucide-react";
+import { Loader2, Users, Bookmark, BarChart, PieChart, Plus, BookOpen, LogOut } from "lucide-react";
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface DashboardStats {
@@ -23,7 +23,8 @@ interface EnrollmentData {
 }
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
@@ -71,6 +72,11 @@ const AdminDashboard = () => {
     fetchDashboardData();
   }, [user]);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto py-8 px-4">
@@ -90,11 +96,18 @@ const AdminDashboard = () => {
             Manage your platform and view key metrics
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 space-x-2">
+        <div className="mt-4 sm:mt-0 space-x-2 flex items-center">
           <Button asChild>
             <Link to="/admin/courses/create">
               <Plus className="mr-1 h-4 w-4" /> Create Course
             </Link>
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="h-4 w-4" /> Logout
           </Button>
         </div>
       </div>

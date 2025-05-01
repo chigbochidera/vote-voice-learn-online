@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth-context";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, BookOpen, Clock, Award, ChevronRight } from "lucide-react";
+import { Loader2, BookOpen, Clock, Award, ChevronRight, LogOut } from "lucide-react";
 
 interface Course {
   id: string;
@@ -18,7 +18,8 @@ interface Course {
 }
 
 const UserDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [recentCourses, setRecentCourses] = useState<Course[]>([]);
   const [stats, setStats] = useState({
@@ -81,6 +82,11 @@ const UserDashboard = () => {
     fetchDashboardData();
   }, [user]);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto py-8 px-4">
@@ -93,11 +99,20 @@ const UserDashboard = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Track your progress and continue learning
-        </p>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Track your progress and continue learning
+          </p>
+        </div>
+        <Button 
+          variant="outline" 
+          onClick={handleLogout}
+          className="flex items-center gap-2"
+        >
+          <LogOut className="h-4 w-4" /> Logout
+        </Button>
       </div>
 
       {/* Stats Cards */}
