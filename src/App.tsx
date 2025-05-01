@@ -19,17 +19,19 @@ import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import VerifyEmail from "@/pages/auth/VerifyEmail";
 
-// Adding routes but commenting them out until we implement them
-// import UserDashboard from "@/pages/user/Dashboard";
-// import CourseDetails from "@/pages/courses/CourseDetails";
-// import MyCourses from "@/pages/user/MyCourses";
-// import Profile from "@/pages/user/Profile";
-// import Certificate from "@/pages/user/Certificate";
-// import AdminDashboard from "@/pages/admin/Dashboard";
-// import ManageCourses from "@/pages/admin/ManageCourses";
-// import ManageUsers from "@/pages/admin/ManageUsers";
-// import CreateCourse from "@/pages/admin/CreateCourse";
-// import EditCourse from "@/pages/admin/EditCourse";
+// User Pages
+import UserDashboard from "@/pages/user/Dashboard";
+import MyCourses from "@/pages/user/MyCourses";
+import CourseDetails from "@/pages/courses/CourseDetails";
+import Profile from "@/pages/user/Profile";
+import Certificate from "@/pages/user/Certificate";
+
+// Admin Pages
+import AdminDashboard from "@/pages/admin/Dashboard";
+import ManageCourses from "@/pages/admin/ManageCourses";
+import ManageUsers from "@/pages/admin/ManageUsers";
+import CreateCourse from "@/pages/admin/CreateCourse";
+import EditCourse from "@/pages/admin/EditCourse";
 
 const queryClient = new QueryClient();
 
@@ -52,8 +54,8 @@ const App = () => (
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/verify-email" element={<VerifyEmail />} />
                   
-                  {/* Protected routes will go here once implemented */}
-                  {/* <Route 
+                  {/* User routes */}
+                  <Route 
                     path="/dashboard" 
                     element={
                       <ProtectedRoute>
@@ -92,10 +94,10 @@ const App = () => (
                         <Certificate />
                       </ProtectedRoute>
                     } 
-                  /> */}
+                  />
                   
-                  {/* Admin routes will go here once implemented */}
-                  {/* <Route
+                  {/* Admin routes */}
+                  <Route
                     path="/admin"
                     element={
                       <ProtectedRoute allowedRoles={["admin"]}>
@@ -134,7 +136,7 @@ const App = () => (
                         <EditCourse />
                       </ProtectedRoute>
                     }
-                  /> */}
+                  />
                   
                   {/* Catch-all route */}
                   <Route path="*" element={<NotFound />} />
