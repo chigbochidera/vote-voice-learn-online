@@ -1,211 +1,150 @@
 
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useCourse, markChapterComplete } from "@/services/api";
+import { useAuth } from "@/contexts/auth-context";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, Play, ChevronDown, ChevronUp, Clock, BookOpen, User, Send } from "lucide-react";
+import { 
+  CheckCircle, 
+  Loader2, 
+  MessageSquare, 
+  Clock, 
+  FileText,
+  Video
+} from "lucide-react";
 
-interface Chapter {
-  id: string;
-  title: string;
-  description: string;
-  videoUrl: string;
-  isCompleted: boolean;
-  comments: {
-    id: string;
+// Fake comments data for demonstration
+const FAKE_COMMENTS = [
+  {
+    id: "comment-1",
     user: {
-      name: string;
-      avatar: string;
-    };
-    content: string;
-    timestamp: string;
-  }[];
-}
-
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  instructor: string;
-  thumbnail: string;
-  chapters: Chapter[];
-  totalChapters: number;
-  completedChapters: number;
-}
+      name: "John Smith",
+      avatar: "https://github.com/shadcn.png"
+    },
+    content: "This chapter was really helpful! I especially liked the examples.",
+    timestamp: "2 days ago"
+  },
+  {
+    id: "comment-2",
+    user: {
+      name: "Sarah Lee",
+      avatar: "https://github.com/shadcn.png"
+    },
+    content: "I'm still a bit confused about the middle section. Could you explain it in more detail?",
+    timestamp: "1 day ago"
+  },
+  {
+    id: "comment-3",
+    user: {
+      name: "Michael Johnson",
+      avatar: "https://github.com/shadcn.png"
+    },
+    content: "Great explanation! This cleared up a lot of confusion I had.",
+    timestamp: "12 hours ago"
+  }
+];
 
 const CourseDetails = () => {
   const { courseId } = useParams<{ courseId: string }>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [course, setCourse] = useState<Course | null>(null);
-  const [activeChapterId, setActiveChapterId] = useState<string>("");
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  const { course, isLoading, error } = useCourse(courseId || "");
+  
+  const [selectedChapterIndex, setSelectedChapterIndex] = useState(0);
   const [comment, setComment] = useState("");
-  const [videoSpeed, setVideoSpeed] = useState(1);
+  const [comments, setComments] = useState(FAKE_COMMENTS);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState("1");
+  const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Update video playback rate when the speed changes
   useEffect(() => {
-    const fetchCourseDetails = async () => {
-      setIsLoading(true);
-      try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        
-        // Mock data
-        const mockCourse: Course = {
-          id: courseId || "course-1",
-          title: "Introduction to Web Development",
-          description: "Learn the basics of HTML, CSS, and JavaScript to build modern websites. This comprehensive course covers everything from setting up your development environment to building responsive websites.",
-          instructor: "Sarah Johnson",
-          thumbnail: "https://images.unsplash.com/photo-1587620962725-abab7fe55159?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-          chapters: [
-            {
-              id: "chapter-1",
-              title: "Getting Started with HTML",
-              description: "Learn the basics of HTML structure and syntax",
-              videoUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-              isCompleted: true,
-              comments: [
-                {
-                  id: "comment-1",
-                  user: {
-                    name: "John Smith",
-                    avatar: "https://i.pravatar.cc/100?img=1",
-                  },
-                  content: "Great explanation of the basics!",
-                  timestamp: "2 days ago",
-                },
-                {
-                  id: "comment-2",
-                  user: {
-                    name: "Emma Davis",
-                    avatar: "https://i.pravatar.cc/100?img=5",
-                  },
-                  content: "I'm still confused about semantic tags. Can someone explain?",
-                  timestamp: "1 day ago",
-                },
-              ],
-            },
-            {
-              id: "chapter-2",
-              title: "CSS Fundamentals",
-              description: "Master CSS selectors, properties, and values",
-              videoUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-              isCompleted: true,
-              comments: [
-                {
-                  id: "comment-3",
-                  user: {
-                    name: "Michael Brown",
-                    avatar: "https://i.pravatar.cc/100?img=3",
-                  },
-                  content: "The CSS box model explanation was very helpful!",
-                  timestamp: "3 days ago",
-                },
-              ],
-            },
-            {
-              id: "chapter-3",
-              title: "JavaScript Basics",
-              description: "Introduction to JavaScript variables, functions, and control flow",
-              videoUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-              isCompleted: false,
-              comments: [],
-            },
-            {
-              id: "chapter-4",
-              title: "Responsive Design",
-              description: "Learn how to make your websites look great on all devices",
-              videoUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-              isCompleted: false,
-              comments: [],
-            },
-          ],
-          totalChapters: 4,
-          completedChapters: 2,
-        };
-        
-        setCourse(mockCourse);
-        setActiveChapterId(mockCourse.chapters[0].id);
-      } catch (error) {
-        console.error("Error fetching course details:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (videoRef.current) {
+      videoRef.current.playbackRate = parseFloat(playbackSpeed);
+    }
+  }, [playbackSpeed]);
 
-    fetchCourseDetails();
-  }, [courseId]);
+  const selectedChapter = course?.chapters[selectedChapterIndex];
 
-  const handleMarkAsComplete = (chapterId: string) => {
-    if (!course) return;
-    
-    const updatedChapters = course.chapters.map(chapter => {
-      if (chapter.id === chapterId) {
-        return { ...chapter, isCompleted: !chapter.isCompleted };
-      }
-      return chapter;
-    });
-    
-    const updatedCompletedCount = updatedChapters.filter(c => c.isCompleted).length;
-    
-    setCourse({
-      ...course,
-      chapters: updatedChapters,
-      completedChapters: updatedCompletedCount,
-    });
-    
-    toast(
-      updatedChapters.find(c => c.id === chapterId)?.isCompleted 
-        ? "Chapter marked as complete!" 
-        : "Chapter marked as incomplete",
-      {
-        description: "Your progress has been updated",
-      }
-    );
+  const handleChapterSelect = (index: number) => {
+    setSelectedChapterIndex(index);
   };
 
-  const handleSubmitComment = () => {
-    if (!comment.trim() || !course) return;
+  const handleMarkComplete = async () => {
+    if (!course || !selectedChapter) return;
     
-    const updatedChapters = course.chapters.map(chapter => {
-      if (chapter.id === activeChapterId) {
-        return {
-          ...chapter,
-          comments: [
-            ...chapter.comments,
-            {
-              id: `comment-${Date.now()}`,
-              user: {
-                name: "You",
-                avatar: "https://i.pravatar.cc/100?img=8",
-              },
-              content: comment,
-              timestamp: "Just now",
-            },
-          ],
-        };
+    try {
+      const success = await markChapterComplete(course.id, selectedChapter.id, user?.id || "");
+      
+      if (success) {
+        // Update local state
+        const updatedChapters = course.chapters.map((chapter, index) => {
+          if (index === selectedChapterIndex) {
+            return { ...chapter, isCompleted: true };
+          }
+          return chapter;
+        });
+        
+        // This is a mock update since we're not actually modifying the API data
+        toast.success("Chapter marked as completed!");
       }
-      return chapter;
-    });
-    
-    setCourse({
-      ...course,
-      chapters: updatedChapters,
-    });
-    
-    setComment("");
-    toast("Comment posted", {
-      description: "Your comment has been added to the discussion",
-    });
+    } catch (error) {
+      console.error("Error marking chapter as complete:", error);
+      toast.error("Failed to update progress");
+    }
   };
 
-  const activeChapter = course?.chapters.find(c => c.id === activeChapterId);
-  const progress = course ? Math.round((course.completedChapters / course.totalChapters) * 100) : 0;
+  const handleCommentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!comment.trim()) return;
+    
+    setIsSubmitting(true);
+    
+    // Simulate API call to post comment
+    setTimeout(() => {
+      const newComment = {
+        id: `comment-${Date.now()}`,
+        user: {
+          name: user?.name || "Current User",
+          avatar: "https://github.com/shadcn.png"
+        },
+        content: comment,
+        timestamp: "Just now"
+      };
+      
+      setComments([newComment, ...comments]);
+      setComment("");
+      setIsSubmitting(false);
+      toast.success("Comment posted successfully");
+    }, 500);
+  };
 
   if (isLoading) {
     return (
@@ -217,12 +156,15 @@ const CourseDetails = () => {
     );
   }
 
-  if (!course) {
+  if (error || !course) {
     return (
       <div className="container mx-auto py-8 px-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Course not found</h2>
-          <p>The course you're looking for doesn't exist or has been removed.</p>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-red-600 mb-2">Error Loading Course</h2>
+          <p className="mb-4">
+            We couldn't load the course information. Please try again later.
+          </p>
+          <Button onClick={() => navigate("/my-courses")}>Back to My Courses</Button>
         </div>
       </div>
     );
@@ -230,228 +172,211 @@ const CourseDetails = () => {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main content area - 2/3 width on large screens */}
-        <div className="lg:col-span-2">
-          <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
-          
-          <div className="mb-6 rounded-lg overflow-hidden bg-black aspect-video">
-            {/* Video player */}
-            <video
-              src={activeChapter?.videoUrl}
-              controls
-              className="w-full h-full"
-              poster={course.thumbnail}
-              preload="metadata"
-              playbackRate={videoSpeed}
-            >
-              Your browser doesn't support HTML5 video.
-            </video>
-          </div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">{course.title}</h1>
+        <p className="text-gray-600 dark:text-gray-400 mb-2">
+          Instructor: {course.instructor}
+        </p>
+      </div>
 
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl font-bold">{activeChapter?.title}</h2>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm">Playback Speed:</span>
-                <select
-                  value={videoSpeed}
-                  onChange={(e) => setVideoSpeed(parseFloat(e.target.value))}
-                  className="text-sm p-1 border rounded"
-                >
-                  <option value="0.5">0.5x</option>
-                  <option value="0.75">0.75x</option>
-                  <option value="1">1x</option>
-                  <option value="1.25">1.25x</option>
-                  <option value="1.5">1.5x</option>
-                  <option value="2">2x</option>
-                </select>
-              </div>
-            </div>
-            <p className="text-gray-600 dark:text-gray-400 mb-3">
-              {activeChapter?.description}
-            </p>
-            <div className="flex items-center">
-              <Checkbox 
-                id={`complete-${activeChapterId}`}
-                checked={activeChapter?.isCompleted}
-                onCheckedChange={() => handleMarkAsComplete(activeChapterId)}
-                className="mr-2"
-              />
-              <label htmlFor={`complete-${activeChapterId}`} className="text-sm font-medium">
-                Mark as completed
-              </label>
-            </div>
-          </div>
-          
-          <Tabs defaultValue="discussion" className="mb-6">
-            <TabsList>
-              <TabsTrigger value="discussion">Discussion</TabsTrigger>
-              <TabsTrigger value="notes">My Notes</TabsTrigger>
-            </TabsList>
-            <TabsContent value="discussion" className="py-4">
-              <div className="mb-4">
-                <h3 className="text-lg font-medium mb-2">Comments</h3>
-                {activeChapter?.comments && activeChapter.comments.length > 0 ? (
-                  <div className="space-y-4">
-                    {activeChapter.comments.map((comment) => (
-                      <div key={comment.id} className="flex gap-3">
-                        <div className="flex-shrink-0">
-                          <img 
-                            src={comment.user.avatar} 
-                            alt={comment.user.name} 
-                            className="w-8 h-8 rounded-full"
-                          />
-                        </div>
-                        <div>
-                          <div className="flex items-baseline gap-2">
-                            <span className="font-medium">{comment.user.name}</span>
-                            <span className="text-xs text-gray-500">{comment.timestamp}</span>
-                          </div>
-                          <p className="text-sm mt-1">{comment.content}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 italic">No comments yet. Be the first to start the discussion!</p>
-                )}
-              </div>
-              
-              <div className="mt-4">
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 rounded-full bg-myvomyvo-100 flex items-center justify-center">
-                      <User className="w-5 h-5 text-myvomyvo-600" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Video and Content Section */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            {selectedChapter ? (
+              <>
+                <div className="relative pt-[56.25%] bg-black">
+                  <video 
+                    ref={videoRef}
+                    src={selectedChapter.videoUrl || "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"}
+                    controls
+                    className="absolute inset-0 w-full h-full"
+                    poster="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop"
+                    preload="metadata"
+                  />
+                </div>
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle>{selectedChapter.title}</CardTitle>
+                      <CardDescription className="mt-1">
+                        {selectedChapter.description}
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">Speed:</span>
+                      <Select 
+                        value={playbackSpeed} 
+                        onValueChange={setPlaybackSpeed}
+                      >
+                        <SelectTrigger className="w-[80px]">
+                          <SelectValue placeholder="1x" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0.5">0.5x</SelectItem>
+                          <SelectItem value="0.75">0.75x</SelectItem>
+                          <SelectItem value="1">1x</SelectItem>
+                          <SelectItem value="1.25">1.25x</SelectItem>
+                          <SelectItem value="1.5">1.5x</SelectItem>
+                          <SelectItem value="2">2x</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                  <div className="flex-grow">
-                    <Textarea
-                      placeholder="Add to the discussion..."
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      className="min-h-[100px]"
-                    />
-                    <Button 
-                      onClick={handleSubmitComment}
-                      disabled={!comment.trim()}
-                      className="mt-2"
-                    >
-                      <Send className="mr-2 h-4 w-4" /> Post Comment
-                    </Button>
+                </CardHeader>
+                <CardFooter>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <Clock className="mr-1 h-4 w-4" />
+                      <span>{selectedChapter.duration}</span>
+                    </div>
+                    {selectedChapter.isCompleted ? (
+                      <div className="flex items-center text-green-500 gap-1">
+                        <CheckCircle className="h-5 w-5" />
+                        <span>Completed</span>
+                      </div>
+                    ) : (
+                      <Button onClick={handleMarkComplete}>
+                        Mark as Completed
+                      </Button>
+                    )}
                   </div>
+                </CardFooter>
+              </>
+            ) : (
+              <div className="p-8 text-center">
+                <p className="text-gray-500 dark:text-gray-400">
+                  Please select a chapter to start learning
+                </p>
+              </div>
+            )}
+          </Card>
+
+          <Tabs defaultValue="discussion">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="discussion">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Discussion
+              </TabsTrigger>
+              <TabsTrigger value="notes">
+                <FileText className="h-4 w-4 mr-2" />
+                Notes
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="discussion" className="space-y-4 pt-4">
+              <form onSubmit={handleCommentSubmit}>
+                <Textarea
+                  placeholder="Share your thoughts or ask a question..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="mb-2"
+                />
+                <div className="flex justify-end">
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting || !comment.trim()}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Posting...
+                      </>
+                    ) : (
+                      "Post Comment"
+                    )}
+                  </Button>
                 </div>
+              </form>
+              
+              <Separator className="my-4" />
+              
+              <div className="space-y-4">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="flex gap-4">
+                    <img
+                      src={comment.user.avatar}
+                      alt={comment.user.name}
+                      className="h-10 w-10 rounded-full"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium">{comment.user.name}</h4>
+                        <span className="text-xs text-gray-500">{comment.timestamp}</span>
+                      </div>
+                      <p className="text-gray-700 dark:text-gray-300 mt-1">
+                        {comment.content}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </TabsContent>
-            <TabsContent value="notes" className="py-4">
-              <div className="mb-4">
-                <h3 className="text-lg font-medium mb-2">My Notes</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Take notes for this chapter that only you can see.
-                </p>
-                <Textarea
-                  placeholder="Write your notes here..."
-                  className="min-h-[200px]"
-                />
-                <Button className="mt-2">Save Notes</Button>
+            
+            <TabsContent value="notes" className="space-y-4 pt-4">
+              <Textarea
+                placeholder="Take notes for this chapter..."
+                className="min-h-[200px]"
+              />
+              <div className="flex justify-end">
+                <Button>Save Notes</Button>
               </div>
             </TabsContent>
           </Tabs>
         </div>
 
-        {/* Sidebar - 1/3 width on large screens */}
+        {/* Chapters List */}
         <div>
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <div className="mb-4">
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Course Progress</span>
-                  <span className="font-medium">{progress}%</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {course.completedChapters} of {course.totalChapters} chapters completed
-                </p>
-              </div>
-              
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center">
-                  <User className="h-5 w-5 mr-2 text-gray-600" />
-                  <span>Instructor: {course.instructor}</span>
-                </div>
-                <div className="flex items-center">
-                  <BookOpen className="h-5 w-5 mr-2 text-gray-600" />
-                  <span>{course.totalChapters} Chapters</span>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="h-5 w-5 mr-2 text-gray-600" />
-                  <span>2.5 hours total</span>
-                </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">Course Chapters</CardTitle>
+              <CardDescription>
+                {course.chapters.filter(ch => ch.isCompleted).length} of {course.chapters.length} completed
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {course.chapters.map((chapter, index) => (
+                  <div 
+                    key={chapter.id}
+                    onClick={() => handleChapterSelect(index)}
+                    className={`p-4 flex items-start gap-3 cursor-pointer transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                      selectedChapterIndex === index ? "bg-gray-100 dark:bg-gray-800" : ""
+                    }`}
+                  >
+                    <div className="flex-shrink-0 pt-0.5">
+                      {chapter.isCompleted ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <Video className="h-5 w-5 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium">{chapter.title}</h3>
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <Clock className="mr-1 h-4 w-4" />
+                        <span>{chapter.duration}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
+            <CardFooter className="flex justify-between pt-6">
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {Math.round((course.chapters.filter(ch => ch.isCompleted).length / course.chapters.length) * 100)}% Complete
+              </div>
+              {course.chapters.filter(ch => ch.isCompleted).length === course.chapters.length && (
+                <Button 
+                  variant="outline"
+                  className="text-green-600 border-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+                  onClick={() => navigate(`/certificate/${course.id}`)}
+                >
+                  View Certificate
+                </Button>
+              )}
+            </CardFooter>
           </Card>
-
-          <div className="mb-2">
-            <h3 className="text-lg font-bold mb-2">Course Content</h3>
-          </div>
-
-          <div className="space-y-2">
-            {course.chapters.map((chapter) => (
-              <Card
-                key={chapter.id}
-                className={`transition-colors ${activeChapterId === chapter.id ? "border-myvomyvo-500 bg-myvomyvo-50 dark:bg-myvomyvo-900/20" : ""}`}
-              >
-                <Collapsible>
-                  <CollapsibleTrigger className="flex justify-between items-center w-full p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 pt-1">
-                        <div className={`w-5 h-5 rounded-full border ${chapter.isCompleted ? "bg-green-100 border-green-500" : "bg-gray-100 border-gray-300"} flex items-center justify-center`}>
-                          {chapter.isCompleted && (
-                            <div className="w-3 h-3 rounded-full bg-green-500" />
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-left">
-                        <div className="font-medium">{chapter.title}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                          <Play className="h-3 w-3 mr-1" /> 10 minutes
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <ChevronDown className="h-5 w-5" />
-                    </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="p-4 pt-0 text-sm">
-                      <Separator className="mb-3" />
-                      <p className="mb-3">{chapter.description}</p>
-                      <div className="flex justify-between">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setActiveChapterId(chapter.id)}
-                        >
-                          <Play className="mr-1 h-4 w-4" /> Watch Now
-                        </Button>
-                        <div className="flex items-center">
-                          <Checkbox 
-                            id={`list-complete-${chapter.id}`}
-                            checked={chapter.isCompleted}
-                            onCheckedChange={() => handleMarkAsComplete(chapter.id)}
-                            className="mr-2"
-                          />
-                          <label htmlFor={`list-complete-${chapter.id}`} className="text-xs">
-                            Complete
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </CollapsibleContent>
-                </Collapsible>
-              </Card>
-            ))}
-          </div>
         </div>
       </div>
     </div>

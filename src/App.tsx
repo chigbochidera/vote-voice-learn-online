@@ -33,6 +33,7 @@ import ManageUsers from "@/pages/admin/ManageUsers";
 import CreateCourse from "@/pages/admin/CreateCourse";
 import EditCourse from "@/pages/admin/EditCourse";
 
+// Create the query client outside of the component
 const queryClient = new QueryClient();
 
 const App = () => (
