@@ -137,7 +137,7 @@ const Home = () => {
                         <SelectValue placeholder="All Categories" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Categories</SelectItem>
+                        <SelectItem value="all">All Categories</SelectItem>
                         <SelectItem value="civics">Civics</SelectItem>
                         <SelectItem value="advocacy">Advocacy</SelectItem>
                         <SelectItem value="leadership">Leadership</SelectItem>
@@ -153,7 +153,7 @@ const Home = () => {
                         <SelectValue placeholder="All Levels" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Levels</SelectItem>
+                        <SelectItem value="all">All Levels</SelectItem>
                         <SelectItem value="beginner">Beginner</SelectItem>
                         <SelectItem value="intermediate">Intermediate</SelectItem>
                         <SelectItem value="advanced">Advanced</SelectItem>
