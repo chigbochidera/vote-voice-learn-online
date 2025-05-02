@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Loader2, Plus, Search, MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { Loader2, Plus, Search, MoreHorizontal, Edit, Trash2, FileText } from "lucide-react";
 
 interface Course {
   id: string;
@@ -21,6 +21,7 @@ interface Course {
   completionRate: number;
   createdAt: string;
   status: "published" | "draft";
+  chaptersCount: number;
 }
 
 const ManageCourses = () => {
@@ -45,6 +46,7 @@ const ManageCourses = () => {
             completionRate: 68,
             createdAt: "2023-07-15",
             status: "published",
+            chaptersCount: 12
           },
           {
             id: "course-2",
@@ -54,6 +56,7 @@ const ManageCourses = () => {
             completionRate: 72,
             createdAt: "2023-08-22",
             status: "published",
+            chaptersCount: 10
           },
           {
             id: "course-3",
@@ -63,6 +66,7 @@ const ManageCourses = () => {
             completionRate: 55,
             createdAt: "2023-09-10",
             status: "published",
+            chaptersCount: 15
           },
           {
             id: "course-4",
@@ -72,6 +76,7 @@ const ManageCourses = () => {
             completionRate: 82,
             createdAt: "2023-10-05",
             status: "published",
+            chaptersCount: 8
           },
           {
             id: "course-5",
@@ -81,6 +86,7 @@ const ManageCourses = () => {
             completionRate: 60,
             createdAt: "2023-11-17",
             status: "draft",
+            chaptersCount: 6
           },
         ];
         
@@ -141,7 +147,7 @@ const ManageCourses = () => {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-12 w-12 animate-spin text-myvomyvo-600" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       ) : (
         <div className="rounded-md border">
@@ -152,6 +158,7 @@ const ManageCourses = () => {
                 <TableHead>Instructor</TableHead>
                 <TableHead className="text-center">Enrollments</TableHead>
                 <TableHead className="text-center">Completion</TableHead>
+                <TableHead className="text-center">Chapters</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[80px]">Actions</TableHead>
@@ -160,7 +167,7 @@ const ManageCourses = () => {
             <TableBody>
               {filteredCourses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     No courses found.
                   </TableCell>
                 </TableRow>
@@ -171,6 +178,7 @@ const ManageCourses = () => {
                     <TableCell>{course.instructor}</TableCell>
                     <TableCell className="text-center">{course.totalEnrollments}</TableCell>
                     <TableCell className="text-center">{course.completionRate}%</TableCell>
+                    <TableCell className="text-center">{course.chaptersCount}</TableCell>
                     <TableCell>
                       {new Date(course.createdAt).toLocaleDateString()}
                     </TableCell>
@@ -199,7 +207,13 @@ const ManageCourses = () => {
                           <DropdownMenuItem asChild>
                             <Link to={`/admin/courses/${course.id}/edit`}>
                               <Edit className="mr-2 h-4 w-4" />
-                              Edit
+                              Edit Course
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to={`/admin/courses/${course.id}/chapters`}>
+                              <FileText className="mr-2 h-4 w-4" />
+                              Manage Chapters
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem 

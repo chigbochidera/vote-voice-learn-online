@@ -32,6 +32,7 @@ import ManageCourses from "@/pages/admin/ManageCourses";
 import ManageUsers from "@/pages/admin/ManageUsers";
 import CreateCourse from "@/pages/admin/CreateCourse";
 import EditCourse from "@/pages/admin/EditCourse";
+import ManageChapters from "@/pages/admin/ManageChapters";
 
 // Create the query client outside of the component
 const queryClient = new QueryClient();
@@ -135,6 +136,14 @@ const App = () => (
                     element={
                       <ProtectedRoute allowedRoles={["admin"]}>
                         <EditCourse />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/courses/:courseId/chapters"
+                    element={
+                      <ProtectedRoute allowedRoles={["admin"]}>
+                        <ManageChapters />
                       </ProtectedRoute>
                     }
                   />

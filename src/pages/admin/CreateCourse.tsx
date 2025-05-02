@@ -14,17 +14,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, Save, ArrowLeft } from "lucide-react";
+import { Loader2, Save, ArrowLeft, Plus } from "lucide-react";
+
+interface FormData {
+  title: string;
+  description: string;
+  category: string;
+  level: string;
+  thumbnailUrl: string;
+  price: string;
+  duration: string;
+  instructorName: string;
+  isPublished: boolean;
+}
 
 const CreateCourse = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
     category: "",
     level: "",
     thumbnailUrl: "",
+    price: "",
+    duration: "",
+    instructorName: "",
+    isPublished: false,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -39,6 +55,14 @@ const CreateCourse = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: checked
     }));
   };
 
@@ -147,16 +171,94 @@ const CreateCourse = () => {
                   </Select>
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="thumbnailUrl">Thumbnail URL</Label>
-                <Input
-                  id="thumbnailUrl"
-                  name="thumbnailUrl"
-                  placeholder="Enter a URL for the course thumbnail image"
-                  value={formData.thumbnailUrl}
-                  onChange={handleChange}
+            </CardContent>
+          </Card>
+
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Additional Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="instructorName">Instructor Name</Label>
+                  <Input
+                    id="instructorName"
+                    name="instructorName"
+                    placeholder="e.g., John Smith"
+                    value={formData.instructorName}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price (USD)</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    placeholder="e.g., 49.99"
+                    value={formData.price}
+                    onChange={handleChange}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duration (hours)</Label>
+                  <Input
+                    id="duration"
+                    name="duration"
+                    placeholder="e.g., 10.5"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    type="number"
+                    min="0"
+                    step="0.5"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="thumbnailUrl">Thumbnail URL</Label>
+                  <Input
+                    id="thumbnailUrl"
+                    name="thumbnailUrl"
+                    placeholder="Enter a URL for the course thumbnail image"
+                    value={formData.thumbnailUrl}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="isPublished"
+                  name="isPublished"
+                  checked={formData.isPublished}
+                  onChange={handleCheckboxChange}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                 />
+                <Label htmlFor="isPublished" className="text-sm font-medium cursor-pointer">
+                  Publish course immediately
+                </Label>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="mb-6">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Chapters</CardTitle>
+              <p className="text-sm text-gray-500">You can add chapters after creating the course</p>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-md">
+                <Plus className="h-10 w-10 text-gray-400 mb-2" />
+                <p className="text-gray-500 font-medium">Chapters will be added after course creation</p>
+                <p className="text-gray-400 text-sm">You'll be able to add content, quizzes, and assignments</p>
               </div>
             </CardContent>
           </Card>

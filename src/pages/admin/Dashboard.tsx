@@ -70,7 +70,7 @@ const AdminDashboard = () => {
     };
 
     fetchDashboardData();
-  }, [user]);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-12 w-12 animate-spin text-myvomyvo-600" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       </div>
     );
@@ -120,7 +120,7 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <Users className="h-8 w-8 text-myvomyvo-600 mr-3" />
+              <Users className="h-8 w-8 text-primary mr-3" />
               <span className="text-3xl font-bold">{stats.totalUsers}</span>
               <span className="ml-2 text-sm text-green-600">+{stats.newUsersThisMonth} this month</span>
             </div>
@@ -182,14 +182,14 @@ const AdminDashboard = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <BookOpen className="h-5 w-5 mr-2 text-myvomyvo-600" />
+                  <BookOpen className="h-5 w-5 mr-2 text-primary" />
                   <span>Total Courses</span>
                 </div>
                 <span className="font-bold">{stats.totalCourses}</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <PieChart className="h-5 w-5 mr-2 text-myvomyvo-600" />
+                  <PieChart className="h-5 w-5 mr-2 text-primary" />
                   <span>Most Popular</span>
                 </div>
                 <span className="font-bold text-right max-w-[150px] truncate" title={stats.mostPopularCourse}>
@@ -202,6 +202,9 @@ const AdminDashboard = () => {
                 </Button>
                 <Button asChild variant="outline">
                   <Link to="/admin/users">Manage Users</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/admin/courses/create">Create Course</Link>
                 </Button>
               </div>
             </div>
@@ -216,19 +219,65 @@ const AdminDashboard = () => {
         </TabsList>
         <TabsContent value="courses">
           <Card>
-            {/* Create a table for latest courses here */}
-            <div className="p-4 text-center">
-              <p>Latest course data would be displayed here.</p>
-              <p className="text-sm text-gray-500">Full implementation coming soon.</p>
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium">Recently Added Courses</h3>
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/admin/courses">View All</Link>
+                </Button>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 border rounded-md">
+                  <div>
+                    <p className="font-medium">TypeScript Mastery</p>
+                    <p className="text-sm text-gray-500">Added 2 days ago</p>
+                  </div>
+                  <Button asChild size="sm">
+                    <Link to="/admin/courses/course-5/edit">Edit</Link>
+                  </Button>
+                </div>
+                <div className="flex justify-between items-center p-3 border rounded-md">
+                  <div>
+                    <p className="font-medium">Advanced CSS and Sass</p>
+                    <p className="text-sm text-gray-500">Added 5 days ago</p>
+                  </div>
+                  <Button asChild size="sm">
+                    <Link to="/admin/courses/course-4/edit">Edit</Link>
+                  </Button>
+                </div>
+              </div>
             </div>
           </Card>
         </TabsContent>
         <TabsContent value="users">
           <Card>
-            {/* Create a table for new users here */}
-            <div className="p-4 text-center">
-              <p>New user data would be displayed here.</p>
-              <p className="text-sm text-gray-500">Full implementation coming soon.</p>
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium">Recently Joined Users</h3>
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/admin/users">View All</Link>
+                </Button>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 border rounded-md">
+                  <div>
+                    <p className="font-medium">Emily Davis</p>
+                    <p className="text-sm text-gray-500">emily@example.com</p>
+                  </div>
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/admin/users">View</Link>
+                  </Button>
+                </div>
+                <div className="flex justify-between items-center p-3 border rounded-md">
+                  <div>
+                    <p className="font-medium">Robert Johnson</p>
+                    <p className="text-sm text-gray-500">robert@example.com</p>
+                  </div>
+                  <Button asChild size="sm" variant="outline">
+                    <Link to="/admin/users">View</Link>
+                  </Button>
+                </div>
+              </div>
             </div>
           </Card>
         </TabsContent>

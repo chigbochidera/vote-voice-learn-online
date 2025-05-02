@@ -99,29 +99,29 @@ const ManageUsers = () => {
   const handleToggleRole = (userId: string) => {
     setUsers(users.map((user) => {
       if (user.id === userId) {
+        const newRole = user.role === "admin" ? "user" : "admin";
+        toast.success(`User role updated to ${newRole} successfully`);
         return {
           ...user,
-          role: user.role === "admin" ? "user" : "admin",
+          role: newRole,
         };
       }
       return user;
     }));
-    
-    toast.success(`User role updated successfully`);
   };
 
   const handleToggleStatus = (userId: string) => {
     setUsers(users.map((user) => {
       if (user.id === userId) {
+        const newStatus = user.status === "active" ? "inactive" : "active";
+        toast.success(`User ${newStatus === "active" ? "activated" : "deactivated"} successfully`);
         return {
           ...user,
-          status: user.status === "active" ? "inactive" : "active",
+          status: newStatus,
         };
       }
       return user;
     }));
-    
-    toast.success(`User status updated successfully`);
   };
 
   const filteredUsers = users.filter((user) =>
@@ -151,7 +151,7 @@ const ManageUsers = () => {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-12 w-12 animate-spin text-myvomyvo-600" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       ) : (
         <div className="rounded-md border">
@@ -183,7 +183,7 @@ const ManageUsers = () => {
                     <TableCell>
                       <Badge
                         variant={user.role === "admin" ? "default" : "outline"}
-                        className={user.role === "admin" ? "bg-myvomyvo-100 text-myvomyvo-800 hover:bg-myvomyvo-100" : ""}
+                        className={user.role === "admin" ? "bg-primary/10 text-primary hover:bg-primary/10" : ""}
                       >
                         {user.role}
                       </Badge>
