@@ -1,196 +1,125 @@
 
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { 
-  Search, 
-  User, 
-  Menu,
-  X,
-  LogIn,
-  Sun,
-  Moon,
-  LogOut
-} from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useTheme } from "@/hooks/use-theme";
-import { useAuth } from "@/contexts/auth-context";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/auth-context';
+import { Button } from '@/components/ui/button';
+import { ModeToggle } from '@/hooks/use-theme';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { User, LogOut } from 'lucide-react';
 
 const Navbar = () => {
-  const isMobile = useIsMobile();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const { theme, setTheme } = useTheme();
-  const { user, logout } = useAuth(); // Use the auth context
-  
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
+  const { user, logout } = useAuth();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
   };
 
   return (
-    <header className={`fixed top-0 w-full z-40 transition-all duration-300 ${isScrolled ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm" : "bg-transparent"}`}>
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center">
-          <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold text-myvomyvo-700 dark:text-myvomyvo-300">
-              MyVote <span className="text-myvomyvo-500">MyVoice</span>
-            </span>
-          </Link>
-        </div>
-
-        {!isMobile && (
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-            <Link to="/" className="text-gray-700 hover:text-myvomyvo-700 dark:text-gray-200 dark:hover:text-myvomyvo-300">Home</Link>
-            <Link to="/courses" className="text-gray-700 hover:text-myvomyvo-700 dark:text-gray-200 dark:hover:text-myvomyvo-300">Courses</Link>
-            <Link to="/about" className="text-gray-700 hover:text-myvomyvo-700 dark:text-gray-200 dark:hover:text-myvomyvo-300">About Us</Link>
-            <Link to="/contact" className="text-gray-700 hover:text-myvomyvo-700 dark:text-gray-200 dark:hover:text-myvomyvo-300">Contact</Link>
-          </nav>
-        )}
-
-        <div className="flex items-center gap-3">
-          {!isMobile && (
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Search className="h-5 w-5" />
-              <span className="sr-only">Search</span>
-            </Button>
-          )}
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-                <span className="sr-only">Toggle theme</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTheme("light")}>
-                Light
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>
-                Dark
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>
-                System
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <User className="h-5 w-5" />
-                  <span className="sr-only">User menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/dashboard">Dashboard</Link>
-                </DropdownMenuItem>
-                {user.role === "admin" && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin">Admin Panel</Link>
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem asChild>
-                  <Link to="/profile">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Link to="/login">
-              <Button variant="default" className="bg-myvomyvo-700 hover:bg-myvomyvo-800 text-white">
-                <LogIn className="mr-2 h-4 w-4" /> Login
-              </Button>
+    <header className="fixed top-0 left-0 right-0 bg-background border-b border-border z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Link to="/" className="text-xl font-bold">
+              EduPlatform
             </Link>
-          )}
-          
-          {isMobile && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="md:hidden rounded-full"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-              <span className="sr-only">Menu</span>
-            </Button>
-          )}
-        </div>
-      </div>
-      
-      {/* Mobile menu */}
-      {isMobile && isMenuOpen && (
-        <div className="md:hidden bg-background border-t border-border animate-fade-in">
-          <div className="container mx-auto px-4 py-3">
-            <nav className="flex flex-col space-y-4 py-4">
-              <Link 
-                to="/" 
-                className="text-base font-medium text-gray-700 hover:text-myvomyvo-700 dark:text-gray-200 dark:hover:text-myvomyvo-300"
-                onClick={() => setIsMenuOpen(false)}
+            <nav className="hidden md:flex items-center space-x-4">
+              <Link
+                to="/"
+                className="text-sm font-medium transition-colors hover:text-primary"
               >
                 Home
               </Link>
-              <Link 
-                to="/courses" 
-                className="text-base font-medium text-gray-700 hover:text-myvomyvo-700 dark:text-gray-200 dark:hover:text-myvomyvo-300"
-                onClick={() => setIsMenuOpen(false)}
+              <Link
+                to="/courses"
+                className="text-sm font-medium transition-colors hover:text-primary"
               >
                 Courses
               </Link>
-              <Link 
-                to="/about" 
-                className="text-base font-medium text-gray-700 hover:text-myvomyvo-700 dark:text-gray-200 dark:hover:text-myvomyvo-300"
-                onClick={() => setIsMenuOpen(false)}
+              <Link
+                to="/about"
+                className="text-sm font-medium transition-colors hover:text-primary"
               >
-                About Us
+                About
               </Link>
-              <Link 
-                to="/contact" 
-                className="text-base font-medium text-gray-700 hover:text-myvomyvo-700 dark:text-gray-200 dark:hover:text-myvomyvo-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
-              <div className="flex items-center">
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Search className="h-5 w-5" />
-                  <span className="sr-only">Search</span>
-                </Button>
-              </div>
+              {user && (
+                <Link
+                  to="/my-courses"
+                  className="text-sm font-medium transition-colors hover:text-primary"
+                >
+                  My Courses
+                </Link>
+              )}
+              {user?.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  className="text-sm font-medium transition-colors hover:text-primary"
+                >
+                  Admin
+                </Link>
+              )}
             </nav>
           </div>
+          <div className="flex items-center space-x-4">
+            <ModeToggle />
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="/avatars/01.png" alt={user.name} />
+                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard">
+                      <span>Dashboard</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link to="/login">
+                  <Button variant="ghost">Log In</Button>
+                </Link>
+                <Link to="/register">
+                  <Button>Sign Up</Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </header>
   );
 };

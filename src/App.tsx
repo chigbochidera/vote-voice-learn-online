@@ -18,6 +18,8 @@ import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import VerifyEmail from "@/pages/auth/VerifyEmail";
+import About from "@/pages/About";
+import CoursesPage from "@/pages/courses/CoursesPage";
 
 // User Pages
 import UserDashboard from "@/pages/user/Dashboard";
@@ -55,6 +57,8 @@ const App = () => (
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/verify-email" element={<VerifyEmail />} />
+                  <Route path="/courses" element={<CoursesPage />} />
+                  <Route path="/about" element={<About />} />
                   
                   {/* User routes */}
                   <Route 
