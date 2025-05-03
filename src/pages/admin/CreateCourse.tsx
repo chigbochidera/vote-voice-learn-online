@@ -1,21 +1,11 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, Save, ArrowLeft, Plus } from "lucide-react";
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import { ArrowLeft } from "lucide-react";
+import CourseDetailsForm from "@/components/courses/CourseDetailsForm";
+import CourseAdditionalDetailsForm from "@/components/courses/CourseAdditionalDetailsForm";
+import ChapterPlaceholder from "@/components/courses/ChapterPlaceholder";
 
 interface FormData {
   title: string;
@@ -43,18 +33,6 @@ const CreateCourse = () => {
     instructorName: "",
     isPublished: false,
   });
-
-  // Rich text editor modules configuration
-  const quillModules = {
-    toolbar: [
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      [{ indent: '-1' }, { indent: '+1' }],
-      ['link', 'image'],
-      ['clean'],
-    ],
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -122,193 +100,33 @@ const CreateCourse = () => {
       </div>
 
       <div className="max-w-3xl mx-auto">
-        <form onSubmit={handleSubmit}>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Course Title</Label>
-                <Input
-                  id="title"
-                  name="title"
-                  placeholder="e.g., Introduction to Web Development"
-                  value={formData.title}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Course Description</Label>
-                <div className="min-h-[200px]">
-                  <ReactQuill
-                    theme="snow"
-                    modules={quillModules}
-                    value={formData.description}
-                    onChange={handleRichTextChange}
-                    placeholder="Provide a detailed description of the course..."
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => handleSelectChange("category", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="web-development">Web Development</SelectItem>
-                      <SelectItem value="mobile-development">Mobile Development</SelectItem>
-                      <SelectItem value="data-science">Data Science</SelectItem>
-                      <SelectItem value="design">Design</SelectItem>
-                      <SelectItem value="business">Business</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="level">Level</Label>
-                  <Select
-                    value={formData.level}
-                    onValueChange={(value) => handleSelectChange("level", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="beginner">Beginner</SelectItem>
-                      <SelectItem value="intermediate">Intermediate</SelectItem>
-                      <SelectItem value="advanced">Advanced</SelectItem>
-                      <SelectItem value="all-levels">All Levels</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <CourseDetailsForm
+          formData={{
+            title: formData.title,
+            description: formData.description,
+            category: formData.category,
+            level: formData.level,
+            thumbnailUrl: formData.thumbnailUrl
+          }}
+          handleChange={handleChange}
+          handleRichTextChange={handleRichTextChange}
+          handleSelectChange={handleSelectChange}
+          isSubmitting={isSubmitting}
+          handleSubmit={handleSubmit}
+        />
 
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Additional Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="instructorName">Instructor Name</Label>
-                  <Input
-                    id="instructorName"
-                    name="instructorName"
-                    placeholder="e.g., John Smith"
-                    value={formData.instructorName}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price (USD)</Label>
-                  <Input
-                    id="price"
-                    name="price"
-                    placeholder="e.g., 49.99"
-                    value={formData.price}
-                    onChange={handleChange}
-                    type="number"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duration (hours)</Label>
-                  <Input
-                    id="duration"
-                    name="duration"
-                    placeholder="e.g., 10.5"
-                    value={formData.duration}
-                    onChange={handleChange}
-                    type="number"
-                    min="0"
-                    step="0.5"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="thumbnailUrl">Thumbnail URL</Label>
-                  <Input
-                    id="thumbnailUrl"
-                    name="thumbnailUrl"
-                    placeholder="Enter a URL for the course thumbnail image"
-                    value={formData.thumbnailUrl}
-                    onChange={handleChange}
-                  />
-                  {formData.thumbnailUrl && (
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500 mb-2">Preview:</p>
-                      <img
-                        src={formData.thumbnailUrl}
-                        alt="Course thumbnail"
-                        className="max-h-40 rounded-md"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="isPublished"
-                  name="isPublished"
-                  checked={formData.isPublished}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <Label htmlFor="isPublished" className="text-sm font-medium cursor-pointer">
-                  Publish course immediately
-                </Label>
-              </div>
-            </CardContent>
-          </Card>
+        <CourseAdditionalDetailsForm
+          formData={{
+            instructorName: formData.instructorName,
+            price: formData.price,
+            duration: formData.duration,
+            isPublished: formData.isPublished
+          }}
+          handleChange={handleChange}
+          handleCheckboxChange={handleCheckboxChange}
+        />
           
-          <Card className="mb-6">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Chapters</CardTitle>
-              <p className="text-sm text-gray-500">You can add chapters after creating the course</p>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-md">
-                <Plus className="h-10 w-10 text-gray-400 mb-2" />
-                <p className="text-gray-500 font-medium">Chapters will be added after course creation</p>
-                <p className="text-gray-400 text-sm">You'll be able to add content, quizzes, and assignments</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Create Course
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
+        <ChapterPlaceholder />
       </div>
     </div>
   );
