@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -15,6 +14,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
 import { Loader2, Save, ArrowLeft, Plus } from "lucide-react";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface FormData {
   title: string;
@@ -43,11 +44,30 @@ const CreateCourse = () => {
     isPublished: false,
   });
 
+  // Rich text editor modules configuration
+  const quillModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ indent: '-1' }, { indent: '+1' }],
+      ['link', 'image'],
+      ['clean'],
+    ],
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleRichTextChange = (content: string) => {
+    setFormData(prev => ({
+      ...prev,
+      description: content
     }));
   };
 
@@ -122,15 +142,15 @@ const CreateCourse = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="description">Course Description</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder="Provide a detailed description of the course..."
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={5}
-                  required
-                />
+                <div className="min-h-[200px]">
+                  <ReactQuill
+                    theme="snow"
+                    modules={quillModules}
+                    value={formData.description}
+                    onChange={handleRichTextChange}
+                    placeholder="Provide a detailed description of the course..."
+                  />
+                </div>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -230,6 +250,16 @@ const CreateCourse = () => {
                     value={formData.thumbnailUrl}
                     onChange={handleChange}
                   />
+                  {formData.thumbnailUrl && (
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500 mb-2">Preview:</p>
+                      <img
+                        src={formData.thumbnailUrl}
+                        alt="Course thumbnail"
+                        className="max-h-40 rounded-md"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 

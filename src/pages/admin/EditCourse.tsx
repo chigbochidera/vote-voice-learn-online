@@ -15,13 +15,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
-import { Loader2, Save, ArrowLeft, Plus, Trash2, ListOrdered, FileEdit } from "lucide-react";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { Loader2, Save, ArrowLeft, Plus, Trash2, ListOrdered, FileEdit, LinkIcon, Upload } from "lucide-react";
 
 interface Chapter {
   id: string;
   title: string;
   description: string;
   videoUrl: string;
+  videoFile?: File | null;
+  videoSource: 'url' | 'file';
 }
 
 const EditCourse = () => {
@@ -42,7 +46,21 @@ const EditCourse = () => {
     title: "",
     description: "",
     videoUrl: "",
+    videoFile: null,
+    videoSource: 'url'
   });
+
+  // Rich text editor modules configuration
+  const quillModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      [{ indent: '-1' }, { indent: '+1' }],
+      ['link', 'image'],
+      ['clean'],
+    ],
+  };
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -66,24 +84,32 @@ const EditCourse = () => {
             title: "Getting Started with HTML",
             description: "Learn the basics of HTML structure and syntax",
             videoUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+            videoFile: null,
+            videoSource: 'url'
           },
           {
             id: "chapter-2",
             title: "CSS Fundamentals",
             description: "Master CSS selectors, properties, and values",
             videoUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+            videoFile: null,
+            videoSource: 'url'
           },
           {
             id: "chapter-3",
             title: "JavaScript Basics",
             description: "Introduction to JavaScript variables, functions, and control flow",
             videoUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+            videoFile: null,
+            videoSource: 'url'
           },
           {
             id: "chapter-4",
             title: "Responsive Design",
             description: "Learn how to make your websites look great on all devices",
             videoUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+            videoFile: null,
+            videoSource: 'url'
           },
         ]);
       } catch (error) {
@@ -105,6 +131,13 @@ const EditCourse = () => {
     }));
   };
 
+  const handleRichTextChange = (content: string) => {
+    setFormData(prev => ({
+      ...prev,
+      description: content
+    }));
+  };
+
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -120,9 +153,45 @@ const EditCourse = () => {
     }));
   };
 
+  const handleChapterRichTextChange = (content: string) => {
+    setNewChapter(prev => ({
+      ...prev,
+      description: content
+    }));
+  };
+
+  const handleVideoSourceChange = (value: 'url' | 'file') => {
+    setNewChapter(prev => ({
+      ...prev,
+      videoSource: value,
+      videoUrl: value === 'file' ? '' : prev.videoUrl,
+      videoFile: value === 'url' ? null : prev.videoFile
+    }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setNewChapter(prev => ({
+        ...prev,
+        videoFile: e.target.files ? e.target.files[0] : null,
+        videoUrl: e.target.files ? URL.createObjectURL(e.target.files[0]) : ''
+      }));
+    }
+  };
+
   const handleAddChapter = () => {
     if (!newChapter.title || !newChapter.description) {
       toast.error("Please provide a title and description for the chapter");
+      return;
+    }
+
+    if (newChapter.videoSource === 'url' && !newChapter.videoUrl) {
+      toast.error("Please provide a video URL");
+      return;
+    }
+
+    if (newChapter.videoSource === 'file' && !newChapter.videoFile) {
+      toast.error("Please upload a video file");
       return;
     }
     
@@ -137,6 +206,8 @@ const EditCourse = () => {
       title: "",
       description: "",
       videoUrl: "",
+      videoFile: null,
+      videoSource: 'url'
     });
     
     toast.success("Chapter added successfully");
@@ -152,6 +223,10 @@ const EditCourse = () => {
     setIsSubmitting(true);
     
     try {
+      // Here we would handle file uploads if there are any
+      // For chapters with videoSource === 'file', we would upload the file
+      // and then update the videoUrl with the URL from the server
+      
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
       
@@ -169,7 +244,7 @@ const EditCourse = () => {
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-12 w-12 animate-spin text-myvomyvo-600" />
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       </div>
     );
@@ -223,14 +298,14 @@ const EditCourse = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="description">Course Description</Label>
-                    <Textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      rows={5}
-                      required
-                    />
+                    <div className="min-h-[200px]">
+                      <ReactQuill
+                        theme="snow"
+                        modules={quillModules}
+                        value={formData.description}
+                        onChange={handleRichTextChange}
+                      />
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -332,14 +407,22 @@ const EditCourse = () => {
                             <span className="text-gray-500 mr-2">#{index + 1}</span>
                             <h3 className="font-medium">{chapter.title}</h3>
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            {chapter.description}
-                          </p>
-                          {chapter.videoUrl && (
-                            <p className="text-xs text-gray-500 mt-1">
-                              Video: {chapter.videoUrl}
-                            </p>
-                          )}
+                          <div 
+                            className="text-sm text-gray-600 dark:text-gray-400 mt-1"
+                            dangerouslySetInnerHTML={{ __html: chapter.description }}
+                          />
+                          <div className="mt-2 flex items-center text-xs text-gray-500">
+                            <span className="mr-1">Video:</span>
+                            {chapter.videoSource === 'url' ? (
+                              <LinkIcon className="h-3 w-3 mr-1" />
+                            ) : (
+                              <Upload className="h-3 w-3 mr-1" />
+                            )}
+                            {chapter.videoSource === 'url' 
+                              ? chapter.videoUrl 
+                              : chapter.videoFile?.name || 'Uploaded file'
+                            }
+                          </div>
                         </div>
                         <Button
                           variant="ghost"
@@ -376,26 +459,74 @@ const EditCourse = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="chapterDescription">Chapter Description</Label>
-                    <Textarea
-                      id="chapterDescription"
-                      name="description"
-                      placeholder="Provide a brief description of the chapter content..."
-                      value={newChapter.description}
-                      onChange={handleChapterChange}
-                      required
-                    />
+                    <div className="min-h-[150px]">
+                      <ReactQuill
+                        theme="snow"
+                        modules={quillModules}
+                        value={newChapter.description}
+                        onChange={handleChapterRichTextChange}
+                        placeholder="Provide a brief description of the chapter content..."
+                      />
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="videoUrl">Video URL</Label>
-                    <Input
-                      id="videoUrl"
-                      name="videoUrl"
-                      placeholder="Enter a URL for the chapter video"
-                      value={newChapter.videoUrl}
-                      onChange={handleChapterChange}
-                    />
+                    <Label>Video Source</Label>
+                    <div className="flex space-x-4">
+                      <div className="flex items-center">
+                        <input 
+                          type="radio" 
+                          id="videoSourceUrl" 
+                          name="videoSource" 
+                          className="mr-2"
+                          checked={newChapter.videoSource === 'url'} 
+                          onChange={() => handleVideoSourceChange('url')}
+                        />
+                        <Label htmlFor="videoSourceUrl" className="cursor-pointer">External URL</Label>
+                      </div>
+                      <div className="flex items-center">
+                        <input 
+                          type="radio" 
+                          id="videoSourceFile" 
+                          name="videoSource" 
+                          className="mr-2"
+                          checked={newChapter.videoSource === 'file'} 
+                          onChange={() => handleVideoSourceChange('file')}
+                        />
+                        <Label htmlFor="videoSourceFile" className="cursor-pointer">Upload File</Label>
+                      </div>
+                    </div>
                   </div>
+                  
+                  {newChapter.videoSource === 'url' ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="videoUrl">Video URL</Label>
+                      <Input
+                        id="videoUrl"
+                        name="videoUrl"
+                        placeholder="Enter a URL for the chapter video"
+                        value={newChapter.videoUrl}
+                        onChange={handleChapterChange}
+                        required={newChapter.videoSource === 'url'}
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="videoFile">Upload Video</Label>
+                      <Input
+                        id="videoFile"
+                        type="file"
+                        accept="video/*"
+                        onChange={handleFileChange}
+                        required={newChapter.videoSource === 'file'}
+                      />
+                      {newChapter.videoFile && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          Selected: {newChapter.videoFile.name} ({(newChapter.videoFile.size / 1024 / 1024).toFixed(2)} MB)
+                        </p>
+                      )}
+                    </div>
+                  )}
                   
                   <div className="flex justify-end">
                     <Button
